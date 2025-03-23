@@ -1,29 +1,24 @@
 def is_safe(processes, allocation, max_demand, available):
     """
-    Implements Banker's Algorithm to check if a system is in a safe state.
-    Returns a safe sequence if possible; otherwise, returns None.
+    Banker's Algorithm for Deadlock Prevention.
+    Returns a safe sequence if the system is in a safe state.
     """
-    n = len(processes)  # Number of processes
-    m = len(available)  # Number of resource types
+    work = available[:]
+    finish = [False] * len(processes)
+    safe_sequence = []
 
-    # Calculate the need matrix
-    need = {p: [max_demand[p][j] - allocation[p][j] for j in range(m)] for p in processes}
-
-    work = available[:]  # Available resources copy
-    finish = {p: False for p in processes}  # Mark all processes as unfinished
-    safe_sequence = []  # Store safe sequence
-
-    while len(safe_sequence) < n:
+    while len(safe_sequence) < len(processes):
         found = False
-        for p in processes:
-            if not finish[p] and all(need[p][j] <= work[j] for j in range(m)):
-                # Process can execute
-                work = [work[j] + allocation[p][j] for j in range(m)]
-                safe_sequence.append(p)
-                finish[p] = True
-                found = True
-                break
-        if not found:
-            return None  # No safe sequence possible
+        for i, process in enumerate(processes):
+            if not finish[i]:
+                if all(max_demand[i][j] - allocation[i][j] <= work[j] for j in range(len(available))):
+                    work = [work[j] + allocation[i][j] for j in range(len(available))]
+                    safe_sequence.append(process)
+                    finish[i] = True
+                    found = True
+                    break
 
-    return safe_sequence
+        if not found:
+            return False, []  # No safe sequence found
+
+    return True, safe_sequence
