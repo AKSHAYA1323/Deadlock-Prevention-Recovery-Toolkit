@@ -1,24 +1,35 @@
-def is_safe(processes, available, max_demand, allocation):
-    """
-    Implements Banker's Algorithm for Deadlock Prevention.
-    """
-    num_processes = len(processes)
-    num_resources = len(available)
-    work = available[:]
-    finish = [False] * num_processes
+def is_safe_state(processes, available, max_demand, allocation):
+    n = len(processes)  # Number of processes
+    m = len(available)  # Number of resource types
+    
+    # Compute Need matrix
+    need = [[max_demand[i][j] - allocation[i][j] for j in range(m)] for i in range(n)]
+    
+    finished = [False] * n
     safe_sequence = []
+    work = available[:]
 
-    while len(safe_sequence) < num_processes:
-        found = False
-        for i in range(num_processes):
-            if not finish[i] and all(max_demand[i][j] - allocation[i][j] <= work[j] for j in range(num_resources)):
-                work = [work[j] + allocation[i][j] for j in range(num_resources)]
-                finish[i] = True
+    print("\n🔹 Checking for a Safe State...")
+    print(f"Available Resources: {available}")
+    print(f"Maximum Demand: {max_demand}")
+    print(f"Current Allocation: {allocation}")
+    print(f"Need Matrix: {need}")
+
+    for _ in range(n):
+        process_found = False
+        for i in range(n):
+            if not finished[i] and all(need[i][j] <= work[j] for j in range(m)):
+                print(f"✅ Process {processes[i]} can execute safely.")
+
+                work = [work[j] + allocation[i][j] for j in range(m)]
                 safe_sequence.append(processes[i])
-                found = True
+                finished[i] = True
+                process_found = True
                 break
-
-        if not found:
+        
+        if not process_found:
+            print("❌ No Safe Sequence Found. Deadlock Prevention Failed.")
             return False, []
 
+    print(f"✅ Safe Sequence Found: {safe_sequence}")
     return True, safe_sequence
