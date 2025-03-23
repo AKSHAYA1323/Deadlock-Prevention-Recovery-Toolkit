@@ -1,25 +1,21 @@
-def detect_deadlock(processes, resources, allocation, request):
+def detect_deadlock(processes, allocation, available, request):
     """
-    Detects deadlocks using Wait-for Graph Algorithm.
+    Detects deadlock using Resource Allocation Graph (RAG).
+    Returns a list of deadlocked processes.
     """
-    num_processes = len(processes)
-    work = [resources[i] - sum(allocation[j][i] for j in range(num_processes)) for i in range(len(resources))]
-    finish = [False] * num_processes
-    deadlocked = []
-
+    work = available[:]
+    finish = {p: False for p in processes}
+    
     while True:
-        found = False
-        for i in range(num_processes):
-            if not finish[i] and all(request[i][j] <= work[j] for j in range(len(resources))):
-                work = [work[j] + allocation[i][j] for j in range(len(resources))]
-                finish[i] = True
-                found = True
-
-        if not found:
+        progress = False
+        for p in processes:
+            if not finish[p] and all(request[p][j] <= work[j] for j in range(len(work))):
+                work = [work[j] + allocation[p][j] for j in range(len(work))]
+                finish[p] = True
+                progress = True
+                break
+        if not progress:
             break
 
-    for i in range(num_processes):
-        if not finish[i]:
-            deadlocked.append(processes[i])
-
-    return deadlocked
+    deadlocked = [p for p in processes if not finish[p]]
+    return deadlocked if deadlocked else None
