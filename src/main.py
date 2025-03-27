@@ -26,25 +26,22 @@ def main():
 
     if is_safe_state:
         print(f"✅ Safe Sequence Found: {safe_sequence}")
-        return
     else:
         print("❌ Deadlock Prevention Failed. Proceeding to Detection.")
 
-    # Deadlock Detection
+    # Deadlock Detection (Always Run)
     print("\n🔹 Running Deadlock Detection...")
     deadlocked_processes = detect_deadlock(processes, allocation, max_demand, available)
 
     if deadlocked_processes:
         print(f"⚠️ Deadlocked Processes: {deadlocked_processes}")
+        
+        # Deadlock Recovery (Only if Deadlock Exists)
+        print("\n🔹 Running Deadlock Recovery...")
+        available, recovery_message = recover_deadlock(deadlocked_processes, allocation, available)
+        print(recovery_message)
     else:
         print("✅ No Deadlock Detected.")
-        return
-
-    # Deadlock Recovery
-    print("\n🔹 Running Deadlock Recovery...")
-    available, recovery_message = recover_deadlock(deadlocked_processes, allocation, available)
-    print(recovery_message)
-
 
 if __name__ == "__main__":
     main()
